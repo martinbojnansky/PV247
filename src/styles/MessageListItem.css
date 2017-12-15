@@ -1,0 +1,34 @@
+.message-list-item {
+    display: flex;
+    flex-direction: column;
+}
+
+.message-list-item.own {
+    align-self: flex-end;
+}
+
+.message-list-item-row {
+    display: flex;
+    flex-direction: row;
+    align-self: flex-start;
+    align-items: flex-start;  
+    justify-content: flex-start;
+}
+
+.message-list-item-row.own {
+    align-self: flex-end;
+    flex-direction: row-reverse;
+}
+
+.message-list-item-row > img {
+    flex: 0 0 50px;
+    width: 50px;
+    height: 50px;
+    margin: 0 10px 0 0;
+}
+
+.message-list-item-row.own > img {
+    width: 50px;
+    height: 50px;
+    margin: 0 0 0 10px;
+}
