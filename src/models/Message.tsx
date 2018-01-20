@@ -9,7 +9,8 @@ export default interface Message {
 }
 
 export interface MessageCustomData {
-    votes: number;
+    upVotes: string[];
+    downVotes: string[];
 }
 
 export interface MessageDTO {

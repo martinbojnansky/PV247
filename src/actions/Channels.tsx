@@ -60,7 +60,7 @@ function parseChannels(dtos: ChannelDTO[]): Channel[] {
 }
 
 export function onSelectedChannelChanged(channel: Channel): actions.SelectedChannelChanged {
-    store.dispatch(onGetMessages(channel.id));
+    onGetMessages(channel.id);
     onGetChannelMembers(channel);
     
     return {

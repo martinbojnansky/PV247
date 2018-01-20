@@ -4,12 +4,16 @@ import { StoreState, initialState } from './StoreState';
 import { history } from './History';
 import { reducers } from './../reducers/Reducers';
 
+const middleware = 
+[
+  require('redux-thunk').default, 
+  routerMiddleware(history)
+];
+
 export const store = createStore<StoreState>(
-    connectRouter(history)(reducers),
-    initialState,
-    compose(
-        applyMiddleware(
-          routerMiddleware(history)
-        ),
-      ),
+  connectRouter(history)(reducers),
+  initialState,
+  compose(
+      applyMiddleware(...middleware),
+    ),
 );

@@ -22,6 +22,8 @@ export interface ConversationDispatch {
     onRenameChannel: (channel: Channel) => actions.RenameChannelAction;
     onInviteMemberToChannel: (channel: Channel) => actions.InviteMemberToChannelAction;
     onDeleteChannel: (channelId: string) => actions.DeleteChannelAction;
+    onVoteMessage: (channelId: string, message: Message, userId: string, isPositive: boolean) 
+        => actions.VoteMessageAction;
     onDeleteMessage: (channelId: string, messageId: string) => actions.DeleteMessageAction;
 }
 
@@ -120,11 +122,21 @@ function getMessagesList(props: ConversationProps & ConversationDispatch) {
                 message={message}
                 owner={props.members[message.createdBy]}
                 currentUserId={props.currentUserId}
+                onUpVote={() => { 
+                    if (props.channel) { 
+                        props.onVoteMessage(props.channel.id, message, props.currentUserId, true); 
+                    }
+                }}
+                onDownVote={() => { 
+                    if (props.channel) { 
+                      props.onVoteMessage(props.channel.id, message, props.currentUserId, false); 
+                    }
+                }}
                 onDelete={() => { 
                     if (props.channel) {
                         props.onDeleteMessage(props.channel.id, message.id); 
-                    }}
-                }
+                    }
+                }}
             />
         );
     });

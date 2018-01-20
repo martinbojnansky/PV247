@@ -3,7 +3,6 @@ import './../styles/Channels.css';
 import * as actions from './../actions/Actions';
 import Channel from '../models/Channel';
 import { StoreState } from '../models/StoreState';
-import { store } from '../models/Store';
 import { ChannelListItem } from './ChannelListItem';
 import Conversation from './../containers/Conversation';
 
@@ -21,7 +20,7 @@ export interface ChannelsDispatch {
 
 export default class Channels extends React.Component<ChannelsProps & ChannelsDispatch, StoreState> {
     componentWillMount() {
-        store.dispatch(this.props.onGetAllChannels());
+        this.props.onGetAllChannels();
     }
 
     render() {

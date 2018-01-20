@@ -68,7 +68,11 @@ export enum TypeKeys {
   DELETE_MESSAGE = 'DELETE_MESSAGE',
   DELETE_MESSAGE_STARTED = 'DELETE_MESSAGE_STARTED',
   DELETE_MESSAGE_FAILED = 'DELETE_MESSAGE_FAILED',
-  DELETE_MESSAGE_COMPLETED = 'DELETE_MESSAGE_COMPLETED'
+  DELETE_MESSAGE_COMPLETED = 'DELETE_MESSAGE_COMPLETED',
+  VOTE_MESSAGE = 'VOTE_MESSAGE',
+  VOTE_MESSAGE_STARTED = 'VOTE_MESSAGE_STARTED',
+  VOTE_MESSAGE_COMPLETED = 'VOTE_MESSAGE_COMPLETED',
+  VOTE_MESSAGE_FAILED = 'VOTE_MESSAGE_FAILED'
 }
 
 /* Error */
@@ -308,6 +312,22 @@ export interface DeleteMessageCompletedAction {
   type: TypeKeys.DELETE_MESSAGE_COMPLETED;
 }
 
+export interface VoteMessageAction {
+  type: TypeKeys.VOTE_MESSAGE;
+}
+
+export interface VoteMessageStartedAction {
+  type: TypeKeys.VOTE_MESSAGE_STARTED;
+}
+
+export interface VoteMessageFailedAction {
+  type: TypeKeys.VOTE_MESSAGE_FAILED;
+}
+
+export interface VoteMessageCompletedAction {
+  type: TypeKeys.VOTE_MESSAGE_COMPLETED;
+}
+
 export type Action = 
 NotSpecifiedAction
 /* Error */
@@ -370,4 +390,8 @@ NotSpecifiedAction
 | DeleteMessageStartedAction
 | DeleteMessageFailedAction
 | DeleteMessageCompletedAction
+| VoteMessageAction
+| VoteMessageStartedAction
+| VoteMessageCompletedAction
+| VoteMessageFailedAction
 ;

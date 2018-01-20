@@ -1,6 +1,6 @@
 import * as actions from './Actions';
 import { deleteChannel, replaceChannel } from '../api/Channels';
-import { getMessages, deleteMessage } from '../api/Messages';
+import { getMessages, deleteMessage, updateMessage } from '../api/Messages';
 import { store } from '../models/Store';
 import { onShowError } from './Error';
 import { onGetAllChannels } from './Channels';
@@ -105,9 +105,13 @@ function parseMessages(dtos: MessageDTO[]): Message[] {
 }
 
 function scrollToNewestMessage(scroll: boolean) {
-    let scrollbar = document.getElementById('conversation-detail');
-    if (scroll && scrollbar) {
-        scrollbar.scrollTo(scrollbar.scrollLeft, scrollbar.scrollHeight);
+    try {
+        let scrollbar = document.getElementById('conversation-detail');
+        if (scroll && scrollbar) {
+            scrollbar.scrollTo(scrollbar.scrollLeft, scrollbar.scrollHeight);
+        }
+    } catch {
+        // Ignore error
     }
 }
 
@@ -282,4 +286,87 @@ function onChannelMemberRecieved(user: User) {
         members[member.email] = member;
         store.dispatch(onChannelMembersChanged(members));
     });
+}
+
+export function onVoteMessageStarted(): actions.VoteMessageStartedAction {
+    return {
+        type: actions.TypeKeys.VOTE_MESSAGE_STARTED
+    };
+}
+
+export function onVoteMessageFailed(): actions.VoteMessageFailedAction {
+    return {
+        type: actions.TypeKeys.VOTE_MESSAGE_FAILED
+    };
+}
+
+export function onVoteMessageCompleted(): actions.VoteMessageCompletedAction {
+    return {
+        type: actions.TypeKeys.VOTE_MESSAGE_COMPLETED
+    };
+}
+
+export const onVoteMessage = 
+    (channelId: string, message: Message, userId: string, isPositive: boolean): actions.VoteMessageAction => {  
+    store.dispatch(onVoteMessageStarted());
+
+    try {
+        let votedMessage = voteMessage(message, userId, isPositive);
+            
+        updateMessage(channelId, votedMessage)
+        .then(() => {
+            store.dispatch(onVoteMessageCompleted());
+        })
+        .catch((error: Error) => {
+            store.dispatch(
+                onShowError('Oops!', 'Could not vote message. Check your network connection and try again.'));
+            store.dispatch(onVoteMessageFailed());
+        });
+    } catch {
+        store.dispatch(onShowError('Oops!', 'You have already voted!'));
+    }
+
+    return {
+        type: actions.TypeKeys.VOTE_MESSAGE
+    };
+};
+
+function voteMessage(message: Message, userId: string, isPositive: boolean): Message {
+    if (isPositive) {
+        return upVoteMessage(message, userId);
+    } else {
+        return downVoteMessage(message, userId);
+    }
+}
+
+function upVoteMessage(message: Message, userId: string): Message {   
+    if (message.customData.upVotes.findIndex(i => i === userId) === -1) {
+        // upvote
+        message.customData.upVotes.push(userId);
+        // remove downvote if exists
+        let downVoteIndex = message.customData.downVotes.findIndex(i => i === userId);
+        if (downVoteIndex > -1) {
+            message.customData.downVotes.splice(downVoteIndex, 1);
+        }
+    } else {
+        throw new Error();
+    }
+
+    return message;
+}
+
+function downVoteMessage(message: Message, userId: string): Message {
+    if (message.customData.downVotes.findIndex(i => i === userId) === -1) {
+        // downvote
+        message.customData.downVotes.push(userId);
+        // remove upvote if exists
+        let upVoteIndex = message.customData.upVotes.findIndex(i => i === userId);
+        if (upVoteIndex > -1) {
+            message.customData.upVotes.splice(upVoteIndex, 1);
+        }
+    } else {
+        throw new Error();
+    }
+
+    return message;
 }

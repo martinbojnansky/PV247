@@ -11,6 +11,8 @@ export interface MessageListItemProps {
 }
 
 export interface MessageListItemDispatch {
+    onUpVote: () => void;
+    onDownVote: () => void;
     onDelete: () => void;
 }
 
@@ -28,6 +30,8 @@ export class MessageListItem extends React.Component<MessageListItemProps & Mess
                     <div className={`alert ${isOwner(this.props) ? 'alert-danger' : 'alert-warning'}`}> 
                         {this.props.message.value}
                     </div>
+                    {/* vote buttons */}
+                    {getVoteButtons(this.props)}
                     {/* delete button */}
                     {getDeleteButton(this.props)}
                 </div>
@@ -62,10 +66,31 @@ function getProfilePicture(props: MessageListItemProps & MessageListItemDispatch
     );
 }
 
+function getVoteButtons(props: MessageListItemProps & MessageListItemDispatch) {
+    return (
+        <div className="d-flex flex-row ml-2 mr-2">
+            <span className="btn btn-sm btn-secondary">
+                {props.message.customData.upVotes.length - props.message.customData.downVotes.length}
+            </span>
+            { !isOwner(props) 
+                ?   <div className="d-flex flex-row">
+                        <button className="btn btn-sm ml-1 mr-1" onClick={() => { props.onUpVote(); }}>
+                            +
+                        </button>
+                        <button className="btn btn-sm" onClick={() => { props.onDownVote(); }}>
+                            -
+                        </button>
+                    </div>
+                :   <span/>
+            }
+        </div>
+    );
+}
+
 function getDeleteButton(props: MessageListItemProps & MessageListItemDispatch) {
     if (isOwner(props)) {
         return (
-            <button className="btn btn-danger btn-sm mr-2" onClick={() => { props.onDelete(); }}>
+            <button className="btn btn-danger btn-sm" onClick={() => { props.onDelete(); }}>
                 Delete
             </button>
         );

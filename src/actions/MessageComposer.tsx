@@ -38,7 +38,7 @@ export function onSendMessage(message: string): actions.SendMessageAction {
     let channelId = channel ? channel.id : '';
     let newMessage: NewMessageDTO = {
         value: message, 
-        customData: JSON.stringify({ votes: 0 })
+        customData: JSON.stringify({ upVotes: [], downVotes: [] })
     };
 
     sendMessage(channelId, newMessage)

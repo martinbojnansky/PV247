@@ -27,17 +27,22 @@ export function onLogInCompleted(email: string): actions.LogInCompletedAction {
 
 export const onLogIn = (email: string): actions.LogInAction => {
     store.dispatch(onLogInStarted());
-  
-    authorize(email)
-    .then((token: string) => {
-        localStorage.setItem(localStorageKeys.USER_ID, email);
-        localStorage.setItem(localStorageKeys.TOKEN, token);
-        store.dispatch(onLogInCompleted(email));
-        store.dispatch(push(routes.Routes.DEFAULT, store.getState()));
-    }).catch((error: Error) => {
-        store.dispatch(onShowError('Ooops!', `User with email address ${email} doesn't exists`));
+
+    if (email !== '') {
+        authorize(email)
+        .then((token: string) => {
+            localStorage.setItem(localStorageKeys.USER_ID, email);
+            localStorage.setItem(localStorageKeys.TOKEN, token);
+            store.dispatch(onLogInCompleted(email));
+            store.dispatch(push(routes.Routes.DEFAULT, store.getState()));
+        }).catch((error: Error) => {
+            store.dispatch(onShowError('Ooops!', `User with email address ${email} doesn't exists`));
+            store.dispatch(onLogInFailed());
+        });
+    } else {
+        store.dispatch(onShowError('Ooops!', `User name cannot be empty.`));
         store.dispatch(onLogInFailed());
-    });
+    }
 
     return {
         type: actions.TypeKeys.LOG_IN

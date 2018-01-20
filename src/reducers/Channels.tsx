@@ -5,6 +5,8 @@ export function channels(state: ChannelsProps, action: actions.Action): Channels
   switch (action.type) {  
     case actions.TypeKeys.GET_ALL_CHANNELS_COMPLETED:
       return { ...state, channels: action.channels, isChannelsDataLoaded: true };
+    case actions.TypeKeys.GET_ALL_CHANNELS_FAILED:
+      return { ...state, isChannelsDataLoaded: true };
     case actions.TypeKeys.SELECTED_CHANNEL_CHANGED:
       return { ...state, selectedChannel: action.selectedChannel };
     default:
