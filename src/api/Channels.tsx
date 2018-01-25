@@ -8,11 +8,6 @@ export const addChannel = (newChannel: NewChannelDTO) => {
         op: ChannelOperationType.ADD,
         value: newChannel
     };
-    alert(JSON.stringify({
-        method: 'PATCH',
-        headers: defaultHeaders(),
-        body: `[${JSON.stringify(operation)}]`
-    }));
 
     return fetch(
     `${API_URI}app/${API_KEY}`,
