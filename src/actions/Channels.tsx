@@ -1,6 +1,6 @@
 import * as actions from './Actions';
 import { getChannels, addChannel } from '../api/Channels';
-import { store } from '../models/Store';
+import { getStore } from '../models/Store';
 import { App } from '../models/App';
 import Channel, { ChannelDTO, ChannelCustomData, NewChannelDTO } from '../models/Channel';
 import { onShowError } from './Error';
@@ -43,9 +43,9 @@ export const onGetAllChannels: ActionCreator<ThunkAction<Promise<actions.Action>
             channels = channels.filter(c => 
                 c.customData.owner === currentUserId
                 || c.customData.memberIds.findIndex(i => i === currentUserId) !== -1);
-            
-            dispatch(onSelectedChannelChanged(channels[0]));
-            return dispatch(onGetAllChannelsCompleted(channels));
+                      
+            dispatch(onGetAllChannelsCompleted(channels));
+            return dispatch(onSelectedChannelChanged(channels[0]));
             
         } catch(error) {
             dispatch(onShowError('Ooops!', 'Unable to get channels. Check your network connection and try again.'));
@@ -53,29 +53,6 @@ export const onGetAllChannels: ActionCreator<ThunkAction<Promise<actions.Action>
         }
     }
 };
-
-// export const onGetAllChannels = (): actions.GetAllChannelsAction => {
-//     store.dispatch(onGetAllChannelsStarted());
-
-//     parse<App>(getChannels())
-//     .then(app => {
-//         let currentUserId: string = store.getState().profile.email;
-//         let channels: Channel[] = parseChannels(app.channels);
-//         channels = channels.filter(c => 
-//             c.customData.owner === currentUserId
-//             || c.customData.memberIds.findIndex(i => i === currentUserId) !== -1);
-//         store.dispatch(onSelectedChannelChanged(channels[0]));
-//         store.dispatch(onGetAllChannelsCompleted(channels));
-//     })
-//     .catch((error: Error) => {
-//         store.dispatch(onGetAllChannelsFailed());
-//         store.dispatch(onShowError('Ooops!', 'Unable to get channels. Check your network connection and try again.'));
-//     });
-    
-//     return {
-//         type: actions.TypeKeys.GET_ALL_CHANNELS
-//     };
-// };
 
 function parseChannels(dtos: ChannelDTO[]): Channel[] {
     return dtos.map(function(dto: ChannelDTO) {
@@ -119,9 +96,9 @@ export function onCreateNewChannelCompleted(): actions.CreateNewChannelCompleted
 export function onCreateNewChannel(): actions.CreateNewChannelAction {
     let name = prompt('Enter new channel name');
     if (name) {
-        store.dispatch(onCreateNewChannelStarted());
+        getStore().dispatch(onCreateNewChannelStarted());
         let newChannelCustomData: ChannelCustomData = {
-            owner: store.getState().profile.email,
+            owner: getStore().getState().profile.email,
             memberIds: [ ]
         };
         let newChannel: NewChannelDTO = {
@@ -131,12 +108,12 @@ export function onCreateNewChannel(): actions.CreateNewChannelAction {
 
         addChannel(newChannel)
         .then(() => {
-            store.dispatch(onCreateNewChannelCompleted());
-            store.dispatch(onGetAllChannels());
+            getStore().dispatch(onCreateNewChannelCompleted());
+            getStore().dispatch(onGetAllChannels());
         })
         .catch((error: Error) => {
-            store.dispatch(onCreateNewChannelFailed());
-            store.dispatch(
+            getStore().dispatch(onCreateNewChannelFailed());
+            getStore().dispatch(
                 onShowError('Ooops!', `Unable to create new channel. Check your network connection and try again.`));
         });
     }

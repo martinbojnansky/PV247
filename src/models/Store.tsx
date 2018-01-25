@@ -10,10 +10,11 @@ const middleware =
   routerMiddleware(history)
 ];
 
-export const store = createStore<StoreState>(
+export function getStore() {
+  return createStore<StoreState>(
   connectRouter(history)(reducers),
   initialState(),
   compose(
       applyMiddleware(...middleware),
     ),
-);
+)};

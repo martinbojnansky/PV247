@@ -9,7 +9,7 @@ import { MessageCustomData, MessageDTO, Message } from '../../models/Message';
 const middlewares = [thunk];
 const mockStore = configureMockStore<StoreState>(middlewares);
 const fetchMock = require('fetch-mock');
-//require('jest-localstorage-mock');
+require('jest-localstorage-mock');
 
 describe('tests conversation thunks', () => {
     beforeAll(() => {

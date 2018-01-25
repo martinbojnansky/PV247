@@ -15,7 +15,7 @@ require('jest-localstorage-mock');
 describe('tests channel thunks', () => {
     beforeAll(() => {
         localStorage.setItem(localStorageKeys.TOKEN, "");
-        localStorage.setItem(localStorageKeys.USER_ID, "a");
+        localStorage.setItem(localStorageKeys.USER_ID, "");
       });
       afterAll(() => {
         localStorage.clear();
@@ -61,7 +61,9 @@ describe('tests channel thunks', () => {
             customData: JSON.parse(dto.customData)
         };
     });
+    channels.pop();
 
+    localStorage.setItem(localStorageKeys.USER_ID, "");
     fetchMock.get(`${API_URI}app/${API_KEY}`, app);
 
     const store = mockStore(initialState());

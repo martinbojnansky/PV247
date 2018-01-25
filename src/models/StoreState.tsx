@@ -1,11 +1,12 @@
 import { ProgressIndicatorProps } from './../components/ProgressIndicator';
 import { ProfileProps } from './../components/Profile';
 import { ChannelsProps } from './../components/Channels';
-import { tryGetUserId } from './../constants/LocalStorageConstants';
+import { tryGetLocalStorageValue } from './../constants/LocalStorageConstants';
 import { getDefaultUserCustomData } from './../models/User';
 import { ConversationProps } from '../components/Conversation';
 import { MessageComposerProps } from '../components/MessageComposer';
 import { ErrorProps } from '../components/Error';
+import { Keys as localStorageKeys } from './../constants/LocalStorageConstants';
 
 export interface StoreState {
     progressIndicator: ProgressIndicatorProps;
@@ -16,7 +17,7 @@ export interface StoreState {
     messageComposer: MessageComposerProps;
 }
 
-export const initialState = (): StoreState =>
+export function initialState(): StoreState
 {
     return ({
         progressIndicator: {
@@ -28,7 +29,7 @@ export const initialState = (): StoreState =>
             description: ''
         },
         profile: {
-            email: tryGetUserId(),
+            email: tryGetLocalStorageValue(localStorage, localStorageKeys.USER_ID),
             isUserCustomDataLoaded: false,
             isChanged: false,
             userCustomData: getDefaultUserCustomData(),
@@ -46,7 +47,7 @@ export const initialState = (): StoreState =>
             channel: undefined,
             messages: [],
             members: {},
-            currentUserId: tryGetUserId()
+            currentUserId: tryGetLocalStorageValue(localStorage, localStorageKeys.USER_ID)
         },
         messageComposer: {
             message: '',

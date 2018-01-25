@@ -1,7 +1,7 @@
 import * as actions from './Actions';
 import { deleteChannel, replaceChannel } from '../api/Channels';
 import { getMessages, deleteMessage, updateMessage } from '../api/Messages';
-import { store } from '../models/Store';
+import { getStore } from '../models/Store';
 import { onShowError } from './Error';
 import { onGetAllChannels } from './Channels';
 import Message, { MessageDTO } from '../models/Message';
@@ -35,15 +35,15 @@ export function onDeleteChannelCompleted(): actions.DeleteChannelCompletedAction
 
 export const onDeleteChannel = (channelId: string): actions.DeleteChannelAction => {    
     if (confirm('Do you really want to delete channel?')) {
-        store.dispatch(onDeleteChannelStarted());
+        getStore().dispatch(onDeleteChannelStarted());
         deleteChannel(channelId)
         .then(() => {
-            store.dispatch(onDeleteChannelCompleted());
-            store.dispatch(onGetAllChannels());
+            getStore().dispatch(onDeleteChannelCompleted());
+            getStore().dispatch(onGetAllChannels());
         })
         .catch((error: Error) => {
-            store.dispatch(onDeleteChannelFailed());
-            store.dispatch(
+            getStore().dispatch(onDeleteChannelFailed());
+            getStore().dispatch(
                 onShowError('Ooops!', 'Could not delete channel. Check your network connection and try again.'));
         });
     }
@@ -141,15 +141,15 @@ export function onDeleteMessageCompleted(): actions.DeleteMessageCompletedAction
 
 export const onDeleteMessage = (channelId: string, messageId: string): actions.DeleteMessageAction => {
     if (confirm('Do you really want to delete message?')) {
-        store.dispatch(onDeleteMessageStarted());        
+        getStore().dispatch(onDeleteMessageStarted());        
         deleteMessage(channelId, messageId)
         .then(() => {
-            store.dispatch(onDeleteMessageCompleted());
-            store.dispatch(onGetMessages(channelId, false));
+            getStore().dispatch(onDeleteMessageCompleted());
+            getStore().dispatch(onGetMessages(channelId, false));
         })
         .catch((error: Error) => {
-            store.dispatch(onDeleteMessageFailed());
-            store.dispatch(
+            getStore().dispatch(onDeleteMessageFailed());
+            getStore().dispatch(
                 onShowError('Ooops!', 'Could not delete message. Check your network connection and try again.'));
         });
     }
@@ -180,7 +180,7 @@ export function onRenameChannelCompleted(): actions.RenameChannelCompletedAction
 export const onRenameChannel = (channel: Channel): actions.RenameChannelAction => {    
     let name = prompt('Enter new channel name', channel.name);    
     if (name) {
-        store.dispatch(onRenameChannelStarted());  
+        getStore().dispatch(onRenameChannelStarted());  
 
         let updatedChannel: ChannelDTO = {
             id: channel.id,
@@ -190,12 +190,12 @@ export const onRenameChannel = (channel: Channel): actions.RenameChannelAction =
 
         replaceChannel(updatedChannel)
         .then(() => {
-            store.dispatch(onRenameChannelCompleted());
-            store.dispatch(onGetAllChannels());
+            getStore().dispatch(onRenameChannelCompleted());
+            getStore().dispatch(onGetAllChannels());
         })
         .catch((error: Error) => {
-            store.dispatch(onRenameChannelFailed());
-            store.dispatch(
+            getStore().dispatch(onRenameChannelFailed());
+            getStore().dispatch(
                 onShowError('Ooops!', 'Could not rename channel. Check your network connection and try again.'));
         });
     }
@@ -228,7 +228,7 @@ export const onInviteMemberToChannel = (channel: Channel): actions.InviteMemberT
     if (email 
             && channel.customData.owner !== email
             && channel.customData.memberIds.findIndex(i => i === email) === -1) {
-        store.dispatch(onInviteMemberToChannelStarted());  
+                getStore().dispatch(onInviteMemberToChannelStarted());  
         channel.customData.memberIds.push(email);
         let updatedChannel: ChannelDTO = {
             id: channel.id,
@@ -238,12 +238,12 @@ export const onInviteMemberToChannel = (channel: Channel): actions.InviteMemberT
 
         replaceChannel(updatedChannel)
         .then(() => {
-            store.dispatch(onInviteMemberToChannelCompleted());
-            store.dispatch(onGetAllChannels());
+            getStore().dispatch(onInviteMemberToChannelCompleted());
+            getStore().dispatch(onGetAllChannels());
         })
         .catch((error: Error) => {
-            store.dispatch(onInviteMemberToChannelFailed());
-            store.dispatch(
+            getStore().dispatch(onInviteMemberToChannelFailed());
+            getStore().dispatch(
                 onShowError('Ooops!', 'Could not rename channel. Check your network connection and try again.'));
         });
     }
@@ -260,7 +260,7 @@ export function onGetChannelMembersStarted(): actions.GetChannelMembersStartedAc
 }
 
 export function onGetChannelMembers(channel: Channel) {
-    store.dispatch(onGetChannelMembersStarted());
+    getStore().dispatch(onGetChannelMembersStarted());
     let memberIds = channel.customData.memberIds;
     memberIds.push(channel.customData.owner);
 
@@ -288,9 +288,9 @@ function onChannelMemberRecieved(user: User) {
             displayName: userCustomData.displayName,
             pictureUrl: pictureUrl
         };
-        let members = store.getState().conversation.members;
+        let members = getStore().getState().conversation.members;
         members[member.email] = member;
-        store.dispatch(onChannelMembersChanged(members));
+        getStore().dispatch(onChannelMembersChanged(members));
     });
 }
 
@@ -314,22 +314,22 @@ export function onVoteMessageCompleted(): actions.VoteMessageCompletedAction {
 
 export const onVoteMessage = 
     (channelId: string, message: Message, userId: string, isPositive: boolean): actions.VoteMessageAction => {  
-    store.dispatch(onVoteMessageStarted());
+        getStore().dispatch(onVoteMessageStarted());
 
     try {
         let votedMessage = voteMessage(message, userId, isPositive);
             
         updateMessage(channelId, votedMessage)
         .then(() => {
-            store.dispatch(onVoteMessageCompleted());
+            getStore().dispatch(onVoteMessageCompleted());
         })
         .catch((error: Error) => {
-            store.dispatch(
+            getStore().dispatch(
                 onShowError('Oops!', 'Could not vote message. Check your network connection and try again.'));
-            store.dispatch(onVoteMessageFailed());
+                getStore().dispatch(onVoteMessageFailed());
         });
     } catch {
-        store.dispatch(onShowError('Oops!', 'You have already voted!'));
+        getStore().dispatch(onShowError('Oops!', 'You have already voted!'));
     }
 
     return {

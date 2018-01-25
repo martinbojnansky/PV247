@@ -1,5 +1,5 @@
 import * as actions from './Actions';
-import { store } from './../models/Store';
+import { getStore } from './../models/Store';
 import { User, UserCustomData } from './../models/User';
 import { getUser, getUserPicture, saveUser, saveUserPicture } from './../api/User';
 import { push } from 'connected-react-router';
@@ -43,16 +43,16 @@ export function onGetUserCompleted(userCustomData: UserCustomData, pictureUrl: s
 }
 
 export const onGetUser = (email: string): actions.GetUserAction => {
-    store.dispatch(onGetUserStarted());
+    getStore().dispatch(onGetUserStarted());
 
     parse<User>(getUser(email))
     .then(user => {
         onUserRecieved(user);
     })
     .catch((error: Error) => {
-        store.dispatch(
+        getStore().dispatch(
             onShowError('Ooops!', 'Unable to retrieve user information. Check your network connection and try again.'));
-        store.dispatch(onGetUserFailed());
+        getStore().dispatch(onGetUserFailed());
     });
 
     return {
@@ -65,10 +65,10 @@ function onUserRecieved(user: User) {
     
     parse<string>(getUserPicture(userCustomData.pictureId))
     .then((pictureUrl: string) => {
-        store.dispatch(onGetUserCompleted(userCustomData, pictureUrl));
+        getStore().dispatch(onGetUserCompleted(userCustomData, pictureUrl));
     })
     .catch((error: Error) => {
-        store.dispatch(onGetUserCompleted(userCustomData, ''));
+        getStore().dispatch(onGetUserCompleted(userCustomData, ''));
     });   
 }
 
@@ -96,7 +96,7 @@ const getUserDisplayName = (name: string) => {
     if (name !== '') {
         return name;
     } else {
-        return store.getState().profile.userCustomData.displayName;
+        return getStore().getState().profile.userCustomData.displayName;
     }
 };
 
@@ -104,13 +104,13 @@ const getUserPictureId = (id: string) => {
     if (id !== '') {
         return id;
     } else {
-        return store.getState().profile.userCustomData.pictureId;
+        return getStore().getState().profile.userCustomData.pictureId;
     }
 };
 
 export const onSaveUser = (email: string, displayName: string, pictureFile?: File): 
 actions.SaveUserAction => {
-    store.dispatch(onSaveUserStarted());
+    getStore().dispatch(onSaveUserStarted());
     
     if (pictureFile) {
         parse<BlobFile[]>(saveUserPicture(pictureFile))
@@ -118,7 +118,7 @@ actions.SaveUserAction => {
             onSavingUser(email, displayName, blobFile[0].id);
         })
         .catch((error: Error) => {
-            store.dispatch(
+            getStore().dispatch(
                 onShowError('Ooops!', 'Could not upload picture. Check your network connection and try again.'));
          });
     } else {
@@ -139,17 +139,17 @@ function onSavingUser(email: string, displayName: string, pictureId: string = ''
     parse<User>(saveUser(email, newUser))
     .then(user => {
         let userCustomData: UserCustomData = JSON.parse(user.customData);
-        store.dispatch(onSaveUserCompleted(email, userCustomData));
-        store.dispatch(push(Routes.CHANNELS));
+        getStore().dispatch(onSaveUserCompleted(email, userCustomData));
+        getStore().dispatch(push(Routes.CHANNELS));
     })
     .catch((error: Error) => {
-        store.dispatch(onSaveUserFailed());
-        store.dispatch(onShowError('Ooops!', 'Could not update user. Check your network connection and try again.'));
+        getStore().dispatch(onSaveUserFailed());
+        getStore().dispatch(onShowError('Ooops!', 'Could not update user. Check your network connection and try again.'));
     });
 }
 
 export function onCancelUser(): actions.CancelUserAction {
-    store.dispatch(push(Routes.CHANNELS));
+    getStore().dispatch(push(Routes.CHANNELS));
 
     return {
         type: actions.TypeKeys.CANCEL_USER

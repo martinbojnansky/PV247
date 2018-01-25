@@ -1,6 +1,6 @@
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
-import { store } from './models/Store';
+import { getStore } from './models/Store';
 import { history } from './models/History';
 import { Provider } from 'react-redux';
 import { ConnectedRouter } from 'connected-react-router';
@@ -9,7 +9,7 @@ import './styles/Index.css';
 import registerServiceWorker from './registerServiceWorker';
 
 ReactDOM.render(
-  <Provider store={store}>
+  <Provider store={getStore()}>
       <ConnectedRouter history={history}>
         <App />
       </ConnectedRouter>

@@ -1,5 +1,5 @@
 import * as actions from './Actions';
-import { store } from '../models/Store';
+import { getStore } from '../models/Store';
 import { sendMessage } from '../api/Messages';
 import { NewMessageDTO } from '../models/Message';
 import { onShowError } from './Error';
@@ -32,9 +32,9 @@ export function onSendMessageCompleted(message: string): actions.SendMessageComp
 }
 
 export function onSendMessage(message: string): actions.SendMessageAction {
-    store.dispatch(onSendMessageStarted());
+    getStore().dispatch(onSendMessageStarted());
 
-    let channel = store.getState().conversation.channel;
+    let channel = getStore().getState().conversation.channel;
     let channelId = channel ? channel.id : '';
     let newMessage: NewMessageDTO = {
         value: message, 
@@ -43,12 +43,12 @@ export function onSendMessage(message: string): actions.SendMessageAction {
 
     sendMessage(channelId, newMessage)
     .then(() => {
-        store.dispatch(onSendMessageCompleted(message));
-        store.dispatch(onGetMessages(channelId));
+        getStore().dispatch(onSendMessageCompleted(message));
+        getStore().dispatch(onGetMessages(channelId));
     })
     .catch((error: Error) => {
-        store.dispatch(onSendMessageFailed());
-        store.dispatch(
+        getStore().dispatch(onSendMessageFailed());
+        getStore().dispatch(
             onShowError('Ooops!', `Unable to send message. Check your network connection and try again.`));
     });
     
