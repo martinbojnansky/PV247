@@ -17,11 +17,11 @@ export function mapStateToProps({ profile }: StoreState): ProfileProps {
 
 export function mapDispatchToProps(dispatch: Dispatch<StoreState>): ProfileDispatch {
   return {
-    onDisplayNameChanged: (displayName: string) => dispatch(actions.onUserDisplayNameChanged(displayName)),
-    onPictureChanged: (picturePath: string) => dispatch(actions.onUserPictureChanged(picturePath)),
-    onLoad: (email: string) => dispatch(actions.onGetUser(email)),
-    onSave: (email: string, displayName: string, pictureFile?: File) => 
-      dispatch(actions.onSaveUser(email, displayName, pictureFile)),
+    onPictureChanged: async (picturePath: string) => await dispatch(actions.onUserPictureChanged(picturePath)),
+    onDisplayNameChanged: async (displayName: string) => await dispatch(actions.onUserDisplayNameChanged(displayName)),
+    onLoad: async (email: string) => await dispatch(actions.onGetUser(email)),
+    onSave: async (email: string, displayName: string, pictureFile?: File) => 
+      await dispatch(actions.onSaveUser(email, displayName, pictureFile)),
     onCancel: () => dispatch(actions.onCancelUser())
   };
 }

@@ -15,11 +15,11 @@ export interface ProfileProps {
 }
 
 export interface ProfileDispatch {
-    onDisplayNameChanged: (displayName: string) => actions.UserDisplayNameChangedAction;
-    onPictureChanged: (picturePath: string) => actions.UserPictureChangedAction;
-    onLoad: (email: string) => actions.GetUserAction;
-    onSave: (email: string, displayName: string, newPictureFile?: File) => actions.SaveUserAction;
-    onCancel: () => actions.CancelUserAction;
+    onDisplayNameChanged: (displayName: string) => Promise<actions.Action>;
+    onPictureChanged: (picturePath: string) => Promise<actions.Action>;
+    onLoad: (email: string) => Promise<actions.Action>;
+    onSave: (email: string, displayName: string, newPictureFile?: File) => Promise<actions.Action>;
+    onCancel: () => actions.Action;
 }
 
 export class Profile extends React.Component<ProfileProps & ProfileDispatch, StoreState> {

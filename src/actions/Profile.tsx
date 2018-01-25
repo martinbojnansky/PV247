@@ -1,5 +1,4 @@
 import * as actions from './Actions';
-import { getStore } from './../models/Store';
 import { User, UserCustomData } from './../models/User';
 import { getUser, getUserPicture, saveUser, saveUserPicture } from './../api/User';
 import { push } from 'connected-react-router';
@@ -7,6 +6,9 @@ import { Routes } from '../constants/Routes';
 import { BlobFile } from '../models/BlobFile';
 import { onShowError } from './Error';
 import { parse } from '../api/Response';
+import { ActionCreator, Dispatch } from 'react-redux';
+import { ThunkAction } from 'redux-thunk';
+import { StoreState } from '../models/StoreState';
 
 export function onUserDisplayNameChanged(displayName: string): actions.UserDisplayNameChangedAction {
     return {
@@ -42,34 +44,37 @@ export function onGetUserCompleted(userCustomData: UserCustomData, pictureUrl: s
     };
 }
 
-export const onGetUser = (email: string): actions.GetUserAction => {
-    getStore().dispatch(onGetUserStarted());
 
-    parse<User>(getUser(email))
-    .then(user => {
-        onUserRecieved(user);
-    })
-    .catch((error: Error) => {
-        getStore().dispatch(
-            onShowError('Ooops!', 'Unable to retrieve user information. Check your network connection and try again.'));
-        getStore().dispatch(onGetUserFailed());
-    });
+export const onGetUser: ActionCreator<ThunkAction<Promise<actions.Action>, StoreState, void>> 
+= (email: string) => {
+    return async (dispatch: Dispatch<StoreState>, getState: () => StoreState, params): Promise<actions.Action> => { 
+        dispatch(onGetUserStarted());
 
-    return {
-        type: actions.TypeKeys.GET_USER
-    };
+        try {
+            let user = await parse<User>(getUser(email));
+            return dispatch(onUserRecieved(user));
+        }
+        catch(error) {
+            dispatch(
+                onShowError('Ooops!', 'Unable to retrieve user information. Check your network connection and try again.'));
+            return dispatch(onGetUserFailed());
+        };
+    }
 };
 
-function onUserRecieved(user: User) {
-    let userCustomData: UserCustomData = JSON.parse(user.customData);
-    
-    parse<string>(getUserPicture(userCustomData.pictureId))
-    .then((pictureUrl: string) => {
-        getStore().dispatch(onGetUserCompleted(userCustomData, pictureUrl));
-    })
-    .catch((error: Error) => {
-        getStore().dispatch(onGetUserCompleted(userCustomData, ''));
-    });   
+export const onUserRecieved: ActionCreator<ThunkAction<Promise<actions.Action>, StoreState, void>> 
+= (user: User) => {
+    return async (dispatch: Dispatch<StoreState>, getState: () => StoreState, params): Promise<actions.Action> => { 
+        let userCustomData: UserCustomData = JSON.parse(user.customData);
+        
+        try {
+            let pictureUrl = await parse<string>(getUserPicture(userCustomData.pictureId));
+            return dispatch(onGetUserCompleted(userCustomData, pictureUrl));
+        }
+        catch(error) {
+            return dispatch(onGetUserCompleted(userCustomData, ''));
+        };
+    }   
 }
 
 export function onSaveUserStarted(): actions.SaveUserStartedAction {
@@ -92,66 +97,70 @@ export function onSaveUserCompleted(email: string, userCustomData: UserCustomDat
     };
 }
 
-const getUserDisplayName = (name: string) => {
+const getUserDisplayName = (getState: () => StoreState, name: string) => {
     if (name !== '') {
         return name;
     } else {
-        return getStore().getState().profile.userCustomData.displayName;
+        return getState().profile.userCustomData.displayName;
     }
 };
 
-const getUserPictureId = (id: string) => {
+const getUserPictureId = (getState: () => StoreState, id: string) => {
     if (id !== '') {
         return id;
     } else {
-        return getStore().getState().profile.userCustomData.pictureId;
+        return getState().profile.userCustomData.pictureId;
     }
 };
 
-export const onSaveUser = (email: string, displayName: string, pictureFile?: File): 
-actions.SaveUserAction => {
-    getStore().dispatch(onSaveUserStarted());
-    
-    if (pictureFile) {
-        parse<BlobFile[]>(saveUserPicture(pictureFile))
-        .then(blobFile => {
-            onSavingUser(email, displayName, blobFile[0].id);
-        })
-        .catch((error: Error) => {
-            getStore().dispatch(
-                onShowError('Ooops!', 'Could not upload picture. Check your network connection and try again.'));
-         });
-    } else {
-        onSavingUser(email, displayName);
+export const onSaveUser: ActionCreator<ThunkAction<Promise<actions.Action>, StoreState, void>> 
+= (email: string, displayName: string, pictureFile?: File) => {
+    return async (dispatch: Dispatch<StoreState>, getState: () => StoreState, params): Promise<actions.Action> => { 
+        dispatch(onSaveUserStarted());
+        
+        if (pictureFile) {
+            try {
+                let blobFile = await parse<BlobFile[]>(saveUserPicture(pictureFile));
+                return dispatch(onSavingUser(email, displayName, blobFile[0].id));
+            }
+            catch(error) {
+                return dispatch(
+                    onShowError('Ooops!', 'Could not upload picture. Check your network connection and try again.'));
+            }
+        } else {
+            return dispatch(onSavingUser(email, displayName));
+        }
     }
-
-    return {
-        type: actions.TypeKeys.SAVE_USER
-    };
 };
 
-function onSavingUser(email: string, displayName: string, pictureId: string = '') {
-    let newUser: UserCustomData = { 
-        displayName: getUserDisplayName(displayName), 
-        pictureId: getUserPictureId(pictureId)
-    };
+export const onSavingUser: ActionCreator<ThunkAction<Promise<actions.Action>, StoreState, void>> 
+= (email: string, displayName: string, pictureId: string = '') => {
+    return async (dispatch: Dispatch<StoreState>, getState: () => StoreState, params): Promise<actions.Action> => { 
+        let newUser: UserCustomData = { 
+            displayName: getUserDisplayName(getState, displayName), 
+            pictureId: getUserPictureId(getState, pictureId)
+        };
 
-    parse<User>(saveUser(email, newUser))
-    .then(user => {
-        let userCustomData: UserCustomData = JSON.parse(user.customData);
-        getStore().dispatch(onSaveUserCompleted(email, userCustomData));
-        getStore().dispatch(push(Routes.CHANNELS));
-    })
-    .catch((error: Error) => {
-        getStore().dispatch(onSaveUserFailed());
-        getStore().dispatch(onShowError('Ooops!', 'Could not update user. Check your network connection and try again.'));
-    });
+        try {
+            let user = await parse<User>(saveUser(email, newUser));
+            let userCustomData: UserCustomData = JSON.parse(user.customData);
+            dispatch(push(Routes.CHANNELS));
+            return dispatch(onSaveUserCompleted(email, userCustomData));    
+        }
+        catch(error) {
+            dispatch(onShowError('Ooops!', 'Could not update user. Check your network connection and try again.'));
+            return dispatch(onSaveUserFailed());
+        };
+    }
 }
 
-export function onCancelUser(): actions.CancelUserAction {
-    getStore().dispatch(push(Routes.CHANNELS));
+export const onCancelUser: ActionCreator<ThunkAction<actions.Action, StoreState, void>> 
+= () => {
+    return (dispatch: Dispatch<StoreState>, getState: () => StoreState, params): actions.Action => { 
+        dispatch(push(Routes.CHANNELS));
 
-    return {
-        type: actions.TypeKeys.CANCEL_USER
-    };
+        return {
+            type: actions.TypeKeys.CANCEL_USER
+        };
+    }
 }
