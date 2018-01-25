@@ -73,7 +73,7 @@ export const onSelectedChannelChanged: ActionCreator<ThunkAction<Promise<actions
         return dispatch({
             type: actions.TypeKeys.SELECTED_CHANNEL_CHANGED,
             selectedChannel: channel
-        } as actions.SelectedChannelChanged);
+        } as actions.Action);
     }
 };
 
