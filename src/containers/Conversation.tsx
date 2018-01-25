@@ -17,13 +17,13 @@ export function mapStateToProps({ conversation, profile }: StoreState): Conversa
 
 export function mapDispatchToProps(dispatch: Dispatch<StoreState>): ConversationDispatch {
   return {
-    onGetMessages: (channelId: string) => dispatch(actions.onGetMessages(channelId)),
-    onRenameChannel: (channel: Channel) => dispatch(actions.onRenameChannel(channel)),
-    onInviteMemberToChannel: (channel: Channel) => dispatch(actions.onInviteMemberToChannel(channel)),
-    onDeleteChannel: (channelId: string) => dispatch(actions.onDeleteChannel(channelId)),
-    onVoteMessage: (channelId: string, message: Message, userId: string, isPositive: boolean) => 
-      dispatch(actions.onVoteMessage(channelId, message, userId, isPositive)),
-    onDeleteMessage: (channelId: string, messageId: string) => dispatch(actions.onDeleteMessage(channelId, messageId))
+    onGetMessages: async (channelId: string) => await dispatch(actions.onGetMessages(channelId)),
+    onRenameChannel: async (channel: Channel) => await dispatch(actions.onRenameChannel(channel)),
+    onInviteMemberToChannel: async (channel: Channel) => await dispatch(actions.onInviteMemberToChannel(channel)),
+    onDeleteChannel: async (channelId: string) => await dispatch(actions.onDeleteChannel(channelId)),
+    onVoteMessage: async (channelId: string, message: Message, userId: string, isPositive: boolean) => 
+    await dispatch(actions.onVoteMessage(channelId, message, userId, isPositive)),
+    onDeleteMessage: async (channelId: string, messageId: string) => await dispatch(actions.onDeleteMessage(channelId, messageId))
   };
 }
 

@@ -12,8 +12,8 @@ export function mapStateToProps({ messageComposer }: StoreState): MessageCompose
 
 export function mapDispatchToProps(dispatch: Dispatch<StoreState>): MessageComposerDispatch {  
   return {
-    onMessageChanged: (message: string) => dispatch(actions.onMessageChanged(message)),
-    onSend: (message: string) => dispatch(actions.onSendMessage(message))
+    onMessageChanged: async(message: string) => await dispatch(actions.onMessageChanged(message)),
+    onSend: async (message: string) => await dispatch(actions.onSendMessage(message))
   };
 }
 

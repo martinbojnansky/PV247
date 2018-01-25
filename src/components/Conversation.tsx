@@ -19,12 +19,12 @@ export interface ConversationProps {
 
 export interface ConversationDispatch {
     onGetMessages: (channelId: string) => Promise<actions.Action>;
-    onRenameChannel: (channel: Channel) => actions.RenameChannelAction;
-    onInviteMemberToChannel: (channel: Channel) => actions.InviteMemberToChannelAction;
-    onDeleteChannel: (channelId: string) => actions.DeleteChannelAction;
+    onRenameChannel: (channel: Channel) => Promise<actions.Action>;
+    onInviteMemberToChannel: (channel: Channel) => Promise<actions.Action>;
+    onDeleteChannel: (channelId: string) => Promise<actions.Action>;
     onVoteMessage: (channelId: string, message: Message, userId: string, isPositive: boolean) 
-        => actions.VoteMessageAction;
-    onDeleteMessage: (channelId: string, messageId: string) => actions.DeleteMessageAction;
+        => Promise<actions.Action>;
+    onDeleteMessage: (channelId: string, messageId: string) => Promise<actions.Action>;
 }
 
 export default class Conversation extends React.Component<ConversationProps & ConversationDispatch, StoreState> {

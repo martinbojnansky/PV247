@@ -8,7 +8,7 @@ export interface ChannelListItemProps {
 }
 
 export interface ChannelListItemDispatch {
-    onSelect: (selectedChannel: Channel) => actions.SelectedChannelChanged;
+    onSelect: (selectedChannel: Channel) => Promise<actions.Action>;
 }
 
 export function ChannelListItem(props: ChannelListItemProps & ChannelListItemDispatch) {

@@ -9,8 +9,8 @@ export interface MessageComposerProps {
 }
 
 export interface MessageComposerDispatch {
-    onMessageChanged: (message: string) => actions.MessageChangedAction;
-    onSend: (message: string) => actions.SendMessageAction;
+    onMessageChanged: (message: string) => Promise<actions.Action>;
+    onSend: (message: string) => Promise<actions.Action>;
 }
 
 export default class Conversation extends React.Component<MessageComposerProps & MessageComposerDispatch, StoreState> {

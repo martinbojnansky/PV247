@@ -1,7 +1,6 @@
 import * as actions from './Actions';
 import { deleteChannel, replaceChannel } from '../api/Channels';
 import { getMessages, deleteMessage, updateMessage } from '../api/Messages';
-import { getStore } from '../models/Store';
 import { onShowError } from './Error';
 import { onGetAllChannels } from './Channels';
 import Message, { MessageDTO } from '../models/Message';
@@ -33,24 +32,28 @@ export function onDeleteChannelCompleted(): actions.DeleteChannelCompletedAction
     };
 }
 
-export const onDeleteChannel = (channelId: string): actions.DeleteChannelAction => {    
-    if (confirm('Do you really want to delete channel?')) {
-        getStore().dispatch(onDeleteChannelStarted());
-        deleteChannel(channelId)
-        .then(() => {
-            getStore().dispatch(onDeleteChannelCompleted());
-            getStore().dispatch(onGetAllChannels());
-        })
-        .catch((error: Error) => {
-            getStore().dispatch(onDeleteChannelFailed());
-            getStore().dispatch(
-                onShowError('Ooops!', 'Could not delete channel. Check your network connection and try again.'));
-        });
+export const onDeleteChannel: ActionCreator<ThunkAction<Promise<actions.Action>, StoreState, void>> 
+= (channelId: string) => {
+    return async (dispatch: Dispatch<StoreState>, getState: () => StoreState, params): Promise<actions.Action> => {  
+        if (confirm('Do you really want to delete channel?')) {
+            dispatch(onDeleteChannelStarted());
+            
+            try {
+                await deleteChannel(channelId)
+            
+                dispatch(onDeleteChannelCompleted());
+                return dispatch(onGetAllChannels());
+            }
+            catch(error) {
+                dispatch(
+                    onShowError('Ooops!', 'Could not delete channel. Check your network connection and try again.'));
+                return dispatch(onDeleteChannelFailed());
+            }
+        }
+        else {
+            return dispatch({ type: actions.TypeKeys.NOT_SPECIFIED } as actions.NotSpecifiedAction);
+        }
     }
-    
-    return {
-        type: actions.TypeKeys.DELETE_CHANNEL
-    };
 };
 
 export function onGetMessagesStarted(): actions.GetMessagesStartedAction {
@@ -139,24 +142,27 @@ export function onDeleteMessageCompleted(): actions.DeleteMessageCompletedAction
     };
 }
 
-export const onDeleteMessage = (channelId: string, messageId: string): actions.DeleteMessageAction => {
-    if (confirm('Do you really want to delete message?')) {
-        getStore().dispatch(onDeleteMessageStarted());        
-        deleteMessage(channelId, messageId)
-        .then(() => {
-            getStore().dispatch(onDeleteMessageCompleted());
-            getStore().dispatch(onGetMessages(channelId, false));
-        })
-        .catch((error: Error) => {
-            getStore().dispatch(onDeleteMessageFailed());
-            getStore().dispatch(
-                onShowError('Ooops!', 'Could not delete message. Check your network connection and try again.'));
-        });
+export const onDeleteMessage: ActionCreator<ThunkAction<Promise<actions.Action>, StoreState, void>> 
+= (channelId: string, messageId: string) => {
+    return async (dispatch: Dispatch<StoreState>, getState: () => StoreState, params): Promise<actions.Action> => {
+        if (confirm('Do you really want to delete message?')) {
+            dispatch(onDeleteMessageStarted());        
+            
+            try {
+                await deleteMessage(channelId, messageId);
+                dispatch(onDeleteMessageCompleted());
+                return dispatch(onGetMessages(channelId, false));
+            }
+            catch(error) {
+                dispatch(
+                    onShowError('Ooops!', 'Could not delete message. Check your network connection and try again.'));
+                return dispatch(onDeleteMessageFailed());
+            };
+        }
+        else {
+            return dispatch({ type: actions.TypeKeys.NOT_SPECIFIED } as actions.NotSpecifiedAction);
+        }
     }
-    
-    return {
-        type: actions.TypeKeys.DELETE_MESSAGE
-    };
 };
 
 export function onRenameChannelStarted(): actions.RenameChannelStartedAction {
@@ -177,32 +183,34 @@ export function onRenameChannelCompleted(): actions.RenameChannelCompletedAction
     };
 }
 
-export const onRenameChannel = (channel: Channel): actions.RenameChannelAction => {    
-    let name = prompt('Enter new channel name', channel.name);    
-    if (name) {
-        getStore().dispatch(onRenameChannelStarted());  
+export const onRenameChannel: ActionCreator<ThunkAction<Promise<actions.Action>, StoreState, void>> 
+= (channel: Channel) => {
+    return async (dispatch: Dispatch<StoreState>, getState: () => StoreState, params): Promise<actions.Action> => { 
+        let name = prompt('Enter new channel name', channel.name);    
+        if (name) {
+            dispatch(onRenameChannelStarted());  
 
-        let updatedChannel: ChannelDTO = {
-            id: channel.id,
-            name: name,
-            customData: JSON.stringify(channel.customData)
-        };
+            let updatedChannel: ChannelDTO = {
+                id: channel.id,
+                name: name,
+                customData: JSON.stringify(channel.customData)
+            };
 
-        replaceChannel(updatedChannel)
-        .then(() => {
-            getStore().dispatch(onRenameChannelCompleted());
-            getStore().dispatch(onGetAllChannels());
-        })
-        .catch((error: Error) => {
-            getStore().dispatch(onRenameChannelFailed());
-            getStore().dispatch(
-                onShowError('Ooops!', 'Could not rename channel. Check your network connection and try again.'));
-        });
+            try {
+                await replaceChannel(updatedChannel);
+                dispatch(onRenameChannelCompleted());
+                return dispatch(onGetAllChannels());
+            }
+            catch(error) {
+                dispatch(
+                    onShowError('Ooops!', 'Could not rename channel. Check your network connection and try again.'));
+                return dispatch(onRenameChannelFailed());
+            };
+        }
+        else {
+            return dispatch({ type: actions.TypeKeys.NOT_SPECIFIED } as actions.NotSpecifiedAction);
+        }
     }
-    
-    return {
-        type: actions.TypeKeys.RENAME_CHANNEL
-    };
 };
 
 export function onInviteMemberToChannelStarted(): actions.InviteMemberToChannelStartedAction {
@@ -223,34 +231,36 @@ export function onInviteMemberToChannelCompleted(): actions.InviteMemberToChanne
     };
 }
 
-export const onInviteMemberToChannel = (channel: Channel): actions.InviteMemberToChannelAction => {    
-    let email = prompt('Enter member email address');    
-    if (email 
-            && channel.customData.owner !== email
-            && channel.customData.memberIds.findIndex(i => i === email) === -1) {
-                getStore().dispatch(onInviteMemberToChannelStarted());  
-        channel.customData.memberIds.push(email);
-        let updatedChannel: ChannelDTO = {
-            id: channel.id,
-            name: channel.name,
-            customData: JSON.stringify(channel.customData)
-        };
+export const onInviteMemberToChannel: ActionCreator<ThunkAction<Promise<actions.Action>, StoreState, void>> 
+= (channel: Channel) => {
+    return async (dispatch: Dispatch<StoreState>, getState: () => StoreState, params): Promise<actions.Action> => {   
+        let email = prompt('Enter member email address');    
+        if (email 
+                && channel.customData.owner !== email
+                && channel.customData.memberIds.findIndex(i => i === email) === -1) {
+                    dispatch(onInviteMemberToChannelStarted());  
+            channel.customData.memberIds.push(email);
+            let updatedChannel: ChannelDTO = {
+                id: channel.id,
+                name: channel.name,
+                customData: JSON.stringify(channel.customData)
+            };
 
-        replaceChannel(updatedChannel)
-        .then(() => {
-            getStore().dispatch(onInviteMemberToChannelCompleted());
-            getStore().dispatch(onGetAllChannels());
-        })
-        .catch((error: Error) => {
-            getStore().dispatch(onInviteMemberToChannelFailed());
-            getStore().dispatch(
-                onShowError('Ooops!', 'Could not rename channel. Check your network connection and try again.'));
-        });
+            try {
+                await replaceChannel(updatedChannel)
+                dispatch(onInviteMemberToChannelCompleted());
+                return dispatch(onGetAllChannels());
+            }
+            catch(error) { 
+                dispatch(
+                    onShowError('Ooops!', 'Could not rename channel. Check your network connection and try again.'));
+                return dispatch(onInviteMemberToChannelFailed());
+            };
+        }
+        else {
+            return dispatch({ type: actions.TypeKeys.NOT_SPECIFIED } as actions.NotSpecifiedAction);
+        }
     }
-    
-    return {
-        type: actions.TypeKeys.INVITE_MEMBER_TO_CHANNEL
-    };
 };
 
 export function onGetChannelMembersStarted(): actions.GetChannelMembersStartedAction {
@@ -259,18 +269,21 @@ export function onGetChannelMembersStarted(): actions.GetChannelMembersStartedAc
     };
 }
 
-export function onGetChannelMembers(channel: Channel) {
-    getStore().dispatch(onGetChannelMembersStarted());
-    let memberIds = channel.customData.memberIds;
-    memberIds.push(channel.customData.owner);
+export const onGetChannelMembers: ActionCreator<ThunkAction<Promise<actions.Action>, StoreState, void>> 
+= (channel: Channel) => {
+    return async (dispatch: Dispatch<StoreState>, getState: () => StoreState, params): Promise<actions.Action> => { 
+        dispatch(onGetChannelMembersStarted());
+        let memberIds = channel.customData.memberIds;
+        memberIds.push(channel.customData.owner);
 
-    for (let memberId of memberIds) {
-        parse<User>(getUser(memberId))
-        .then(member => {
-            onChannelMemberRecieved(member);
-        });
+        for (let memberId of memberIds) {
+            let member = await parse<User>(getUser(memberId));
+            dispatch(onChannelMemberRecieved(member));
+        }
+
+        return dispatch({ type: actions.TypeKeys.NOT_SPECIFIED } as actions.Action);
     }
-}
+};
 
 export function onChannelMembersChanged(members: {[id: string]: Member}): actions.ChannelMemberRecievedAction {
     return {
@@ -279,20 +292,23 @@ export function onChannelMembersChanged(members: {[id: string]: Member}): action
     };
 }
 
-function onChannelMemberRecieved(user: User) {
-    let userCustomData: UserCustomData = JSON.parse(user.customData);  
-    parse<string>(getUserPicture(userCustomData.pictureId))
-    .then(pictureUrl => {
+export const onChannelMemberRecieved: ActionCreator<ThunkAction<Promise<actions.Action>, StoreState, void>> 
+= (user: User) => {
+    return async (dispatch: Dispatch<StoreState>, getState: () => StoreState, params): Promise<actions.Action> => { 
+        let userCustomData: UserCustomData = JSON.parse(user.customData);     
+        let pictureUrl = await parse<string>(getUserPicture(userCustomData.pictureId));
+        
         let member: Member = {
             email: user.email,
             displayName: userCustomData.displayName,
             pictureUrl: pictureUrl
         };
-        let members = getStore().getState().conversation.members;
+        let members = getState().conversation.members;
         members[member.email] = member;
-        getStore().dispatch(onChannelMembersChanged(members));
-    });
-}
+
+        return dispatch(onChannelMembersChanged(members));
+    }
+};
 
 export function onVoteMessageStarted(): actions.VoteMessageStartedAction {
     return {
@@ -312,29 +328,27 @@ export function onVoteMessageCompleted(): actions.VoteMessageCompletedAction {
     };
 }
 
-export const onVoteMessage = 
-    (channelId: string, message: Message, userId: string, isPositive: boolean): actions.VoteMessageAction => {  
-        getStore().dispatch(onVoteMessageStarted());
+export const onVoteMessage: ActionCreator<ThunkAction<Promise<actions.Action>, StoreState, void>> 
+= (channelId: string, message: Message, userId: string, isPositive: boolean) => {
+    return async (dispatch: Dispatch<StoreState>, getState: () => StoreState, params): Promise<actions.Action> => { 
+        dispatch(onVoteMessageStarted());
 
-    try {
-        let votedMessage = voteMessage(message, userId, isPositive);
-            
-        updateMessage(channelId, votedMessage)
-        .then(() => {
-            getStore().dispatch(onVoteMessageCompleted());
-        })
-        .catch((error: Error) => {
-            getStore().dispatch(
-                onShowError('Oops!', 'Could not vote message. Check your network connection and try again.'));
-                getStore().dispatch(onVoteMessageFailed());
-        });
-    } catch {
-        getStore().dispatch(onShowError('Oops!', 'You have already voted!'));
+        try {
+            let votedMessage = voteMessage(message, userId, isPositive);
+               
+            try {
+                await updateMessage(channelId, votedMessage);
+                return dispatch(onVoteMessageCompleted());
+            }
+            catch(error) {
+                dispatch(
+                    onShowError('Oops!', 'Could not vote message. Check your network connection and try again.'));
+                return dispatch(onVoteMessageFailed());
+            };
+        } catch {
+            return dispatch(onShowError('Oops!', 'You have already voted!'));
+        }
     }
-
-    return {
-        type: actions.TypeKeys.VOTE_MESSAGE
-    };
 };
 
 function voteMessage(message: Message, userId: string, isPositive: boolean): Message {

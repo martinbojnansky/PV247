@@ -1,10 +1,11 @@
 import * as React from 'react';
+import * as actions from './../actions/Actions';
 
 export interface LogOutProps {
 }
 
 export interface LogOutDispatch {
-  onLogOut?: () => void;
+  onLogOut?: () => Promise<actions.Action>;
 }
 
 function Logout(props: LogOutProps & LogOutDispatch) {

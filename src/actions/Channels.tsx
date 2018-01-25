@@ -1,6 +1,5 @@
 import * as actions from './Actions';
 import { getChannels, addChannel } from '../api/Channels';
-import { getStore } from '../models/Store';
 import { App } from '../models/App';
 import Channel, { ChannelDTO, ChannelCustomData, NewChannelDTO } from '../models/Channel';
 import { onShowError } from './Error';
@@ -65,15 +64,18 @@ function parseChannels(dtos: ChannelDTO[]): Channel[] {
     });
 }
 
-export function onSelectedChannelChanged(channel: Channel): actions.SelectedChannelChanged {
-    onGetMessages(channel.id);
-    onGetChannelMembers(channel);
-    
-    return {
-        type: actions.TypeKeys.SELECTED_CHANNEL_CHANGED,
-        selectedChannel: channel
-    };
-}
+export const onSelectedChannelChanged: ActionCreator<ThunkAction<Promise<actions.Action>, StoreState, void>> 
+= (channel: Channel) => {
+    return async (dispatch: Dispatch<StoreState>, getState: () => StoreState, params): Promise<actions.Action> => {
+        dispatch(onGetMessages(channel.id));
+        dispatch(onGetChannelMembers(channel));
+        
+        return dispatch({
+            type: actions.TypeKeys.SELECTED_CHANNEL_CHANGED,
+            selectedChannel: channel
+        } as actions.SelectedChannelChanged);
+    }
+};
 
 export function onCreateNewChannelStarted(): actions.CreateNewChannelStartedAction {
     return {
@@ -93,32 +95,35 @@ export function onCreateNewChannelCompleted(): actions.CreateNewChannelCompleted
     };
 }
 
-export function onCreateNewChannel(): actions.CreateNewChannelAction {
-    let name = prompt('Enter new channel name');
-    if (name) {
-        getStore().dispatch(onCreateNewChannelStarted());
-        let newChannelCustomData: ChannelCustomData = {
-            owner: getStore().getState().profile.email,
-            memberIds: [ ]
-        };
-        let newChannel: NewChannelDTO = {
-            name: name,
-            customData: JSON.stringify(newChannelCustomData)
-        };
+export const onCreateNewChannel: ActionCreator<ThunkAction<Promise<actions.Action>, StoreState, void>> 
+= () => {
+    return async (dispatch: Dispatch<StoreState>, getState: () => StoreState, params): Promise<actions.Action> => {
+        let name = prompt('Enter new channel name');
+        if (name) {
+            dispatch(onCreateNewChannelStarted());
+            let newChannelCustomData: ChannelCustomData = {
+                owner: getState().profile.email,
+                memberIds: [ ]
+            };
+            let newChannel: NewChannelDTO = {
+                name: name,
+                customData: JSON.stringify(newChannelCustomData)
+            };
 
-        addChannel(newChannel)
-        .then(() => {
-            getStore().dispatch(onCreateNewChannelCompleted());
-            getStore().dispatch(onGetAllChannels());
-        })
-        .catch((error: Error) => {
-            getStore().dispatch(onCreateNewChannelFailed());
-            getStore().dispatch(
-                onShowError('Ooops!', `Unable to create new channel. Check your network connection and try again.`));
-        });
-    }
-    
-    return {
-        type: actions.TypeKeys.CREATE_NEW_CHANNEL
-    };
-}
+            try {
+                await addChannel(newChannel);
+                dispatch(onCreateNewChannelCompleted());
+                return dispatch(onGetAllChannels());
+            }
+            catch(error) { 
+                alert(error);             
+                dispatch(
+                    onShowError('Ooops!', `Unable to create new channel. Check your network connection and try again.`));
+                return dispatch(onCreateNewChannelFailed());
+            }
+        }
+        else {
+            return dispatch({ type: actions.TypeKeys.NOT_SPECIFIED } as actions.NotSpecifiedAction);
+        }
+    }   
+};

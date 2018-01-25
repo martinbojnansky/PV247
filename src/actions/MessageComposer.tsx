@@ -1,9 +1,11 @@
 import * as actions from './Actions';
-import { getStore } from '../models/Store';
 import { sendMessage } from '../api/Messages';
 import { NewMessageDTO } from '../models/Message';
 import { onShowError } from './Error';
 import { onGetMessages } from './Conversation';
+import { ActionCreator, Dispatch } from 'react-redux';
+import { ThunkAction } from 'redux-thunk';
+import { StoreState } from '../models/StoreState';
 
 export function onMessageChanged(message: string): actions.MessageChangedAction {
     return {
@@ -31,28 +33,27 @@ export function onSendMessageCompleted(message: string): actions.SendMessageComp
     };
 }
 
-export function onSendMessage(message: string): actions.SendMessageAction {
-    getStore().dispatch(onSendMessageStarted());
+export const onSendMessage: ActionCreator<ThunkAction<Promise<actions.Action>, StoreState, void>> 
+= (message: string) => {
+    return async (dispatch: Dispatch<StoreState>, getState: () => StoreState, params): Promise<actions.Action> => {
+        dispatch(onSendMessageStarted());
 
-    let channel = getStore().getState().conversation.channel;
-    let channelId = channel ? channel.id : '';
-    let newMessage: NewMessageDTO = {
-        value: message, 
-        customData: JSON.stringify({ upVotes: [], downVotes: [] })
-    };
+        let channel = getState().conversation.channel;
+        let channelId = channel ? channel.id : '';
+        let newMessage: NewMessageDTO = {
+            value: message, 
+            customData: JSON.stringify({ upVotes: [], downVotes: [] })
+        };
 
-    sendMessage(channelId, newMessage)
-    .then(() => {
-        getStore().dispatch(onSendMessageCompleted(message));
-        getStore().dispatch(onGetMessages(channelId));
-    })
-    .catch((error: Error) => {
-        getStore().dispatch(onSendMessageFailed());
-        getStore().dispatch(
-            onShowError('Ooops!', `Unable to send message. Check your network connection and try again.`));
-    });
-    
-    return {
-        type: actions.TypeKeys.SEND_MESSAGE,
-    };
+        try {
+            await sendMessage(channelId, newMessage);
+            dispatch(onSendMessageCompleted(message));
+            return dispatch(onGetMessages(channelId));
+        }
+        catch(error) {
+            dispatch(
+                onShowError('Ooops!', `Unable to send message. Check your network connection and try again.`));
+            return dispatch(onSendMessageFailed());
+        };
+    }
 }

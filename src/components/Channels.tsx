@@ -14,8 +14,8 @@ export interface ChannelsProps {
 
 export interface ChannelsDispatch {
     onGetAllChannels: () => Promise<actions.Action>;
-    onSelectedChannelChanged: (selectedChannel: Channel) => actions.SelectedChannelChanged;
-    onCreateNewChannel: () => actions.CreateNewChannelAction;
+    onSelectedChannelChanged: (selectedChannel: Channel) => Promise<actions.Action>;
+    onCreateNewChannel: () => Promise<actions.Action>;
 }
 
 export default class Channels extends React.Component<ChannelsProps & ChannelsDispatch, StoreState> {
