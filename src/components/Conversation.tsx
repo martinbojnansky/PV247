@@ -6,7 +6,6 @@ import MessageComposer from './../containers/MessageComposer';
 import { MessageListItem } from './../components/MessageListItem';
 import * as actions from './../actions/Actions';
 import Message from '../models/Message';
-import { onGetMessages } from '../actions/Conversation';
 import { Member } from '../models/Member';
 
 export interface ConversationProps {
@@ -18,12 +17,11 @@ export interface ConversationProps {
 }
 
 export interface ConversationDispatch {
-    onGetMessages: (channelId: string) => Promise<actions.Action>;
+    onGetMessages: (channelId: string, scrollToEnd: boolean, showErrors: boolean) => Promise<actions.Action>;
     onRenameChannel: (channel: Channel) => Promise<actions.Action>;
     onInviteMemberToChannel: (channel: Channel) => Promise<actions.Action>;
     onDeleteChannel: (channelId: string) => Promise<actions.Action>;
-    onVoteMessage: (channelId: string, message: Message, userId: string, isPositive: boolean) 
-        => Promise<actions.Action>;
+    onVoteMessage: (channelId: string, message: Message, userId: string, isPositive: boolean) => Promise<actions.Action>;
     onDeleteMessage: (channelId: string, messageId: string) => Promise<actions.Action>;
 }
 
@@ -32,7 +30,7 @@ export default class Conversation extends React.Component<ConversationProps & Co
         setInterval(
             () => {
                 if (this.props.channel) {
-                    onGetMessages(this.props.channel.id, false, false);
+                    this.props.onGetMessages(this.props.channel.id, false, false);
                 }
             }, 
             2000);
@@ -75,7 +73,7 @@ function getActions(props: ConversationProps & ConversationDispatch) {
             <button 
                 className="dropdown-item"
                 onClick={() => { 
-                    if (props.channel) { props.onGetMessages(props.channel.id); }}}
+                    if (props.channel) { props.onGetMessages(props.channel.id, true, true); }}}
             >
                 Refresh
             </button>

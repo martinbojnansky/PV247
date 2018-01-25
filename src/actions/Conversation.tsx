@@ -281,7 +281,7 @@ export const onGetChannelMembers: ActionCreator<ThunkAction<Promise<actions.Acti
             dispatch(onChannelMemberRecieved(member));
         }
 
-        return dispatch({ type: actions.TypeKeys.NOT_SPECIFIED } as actions.Action);
+        return dispatch(onGetMessages(channel.id, false));
     }
 };
 
@@ -338,7 +338,8 @@ export const onVoteMessage: ActionCreator<ThunkAction<Promise<actions.Action>, S
                
             try {
                 await updateMessage(channelId, votedMessage);
-                return dispatch(onVoteMessageCompleted());
+                dispatch(onVoteMessageCompleted());
+                return dispatch(onGetMessages(channelId, false));
             }
             catch(error) {
                 dispatch(
