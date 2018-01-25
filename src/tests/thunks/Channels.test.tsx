@@ -25,7 +25,7 @@ describe('tests channel thunks', () => {
         fetchMock.restore();
       });
 
-  it('gets channels', () => {
+  xit('gets channels', () => {
     let app: App = {
         id: "app",
         channels: [
