@@ -13,7 +13,7 @@ export interface ChannelsProps {
 }
 
 export interface ChannelsDispatch {
-    onGetAllChannels: () => actions.GetAllChannelsAction;
+    onGetAllChannels: () => Promise<actions.Action>;
     onSelectedChannelChanged: (selectedChannel: Channel) => actions.SelectedChannelChanged;
     onCreateNewChannel: () => actions.CreateNewChannelAction;
 }

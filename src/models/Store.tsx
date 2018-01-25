@@ -12,7 +12,7 @@ const middleware =
 
 export const store = createStore<StoreState>(
   connectRouter(history)(reducers),
-  initialState,
+  initialState(),
   compose(
       applyMiddleware(...middleware),
     ),

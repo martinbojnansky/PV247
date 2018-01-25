@@ -13,7 +13,6 @@ export enum TypeKeys {
   SHOW_ERROR = 'SHOW_ERROR',
   HIDE_ERROR = 'HIDE_ERROR',
   /* Login */
-  LOG_IN = 'LOG_IN',
   LOG_IN_STARTED = 'LOG_IN_STARTED',
   LOG_IN_FAILED = 'LOG_IN_FAILED',
   LOG_IN_COMPLETED = 'LOG_IN_COMPLETED',
@@ -40,7 +39,7 @@ export enum TypeKeys {
   DELETE_CHANNEL_STARTED = 'DELETE_CHANNEL_STARTED',
   DELETE_CHANNEL_FAILED = 'DELETE_CHANNEL_FAILED',
   DELETE_CHANNEL_COMPLETED = 'DELETE_CHANNEL_COMPLETED',
-  GET_ALL_CHANNELS = 'GET_ALL_CHANNELS',
+
   GET_ALL_CHANNELS_STARTED = 'GET_ALL_CHANNELS_STARTED',
   GET_ALL_CHANNELS_FAILED = 'GET_ALL_CHANNELS_FAILED',
   GET_ALL_CHANNELS_COMPLETED = 'GET_ALL_CHANNELS_COMPLETED',
@@ -56,7 +55,6 @@ export enum TypeKeys {
   GET_CHANNEL_MEMBERS_STARTED = 'GET_CHANNEL_MEMBERS_STARTED',
   CHANNEL_MEMBER_RECIEVED = 'CHANNEL_MEMBER_RECIEVED',
   /* Messages */
-  GET_MESSAGES = 'GET_MESSAGE',
   GET_MESSAGES_STARTED = 'GET_MESSAGES_STARTED',
   GET_MESSAGES_FAILED = 'GET_MESSAGES_FAILED',
   GET_MESSAGES_COMPLETED = 'GET_MESSAGES_COMPLETED',
@@ -87,10 +85,6 @@ export interface HideErrorAction {
 }
 
 /* Login */
-export interface LogInAction {
-  type: TypeKeys.LOG_IN;
-}
-
 export interface LogInStartedAction {
   type: TypeKeys.LOG_IN_STARTED;
 }
@@ -193,10 +187,6 @@ export interface DeleteChannelCompletedAction {
   type: TypeKeys.DELETE_CHANNEL_COMPLETED;
 }
 
-export interface GetAllChannelsAction {
-  type: TypeKeys.GET_ALL_CHANNELS;
-}
-
 export interface GetAllChannelsStartedAction {
   type: TypeKeys.GET_ALL_CHANNELS_STARTED;
 }
@@ -257,10 +247,6 @@ export interface ChannelMemberRecievedAction {
 }
 
 /* Messages */
-export interface GetMessagesAction {
-  type: TypeKeys.GET_MESSAGES;
-}
-
 export interface GetMessagesStartedAction {
   type: TypeKeys.GET_MESSAGES_STARTED;
 }
@@ -334,7 +320,6 @@ NotSpecifiedAction
 | ShowErrorAction
 | HideErrorAction
 /* Login */
-| LogInAction
 | LogInStartedAction
 | LogInFailedAction
 | LogInCompletedAction 
@@ -361,7 +346,6 @@ NotSpecifiedAction
 | DeleteChannelStartedAction
 | DeleteChannelFailedAction
 | DeleteChannelCompletedAction
-| GetAllChannelsAction
 | GetAllChannelsStartedAction
 | GetAllChannelsFailedAction
 | GetAllChannelsCompletedAction
@@ -377,7 +361,6 @@ NotSpecifiedAction
 | GetChannelMembersStartedAction
 | ChannelMemberRecievedAction
 /* Messages */
-| GetMessagesAction
 | GetMessagesStartedAction
 | GetMessagesFailedAction
 | GetMessagesCompletedAction

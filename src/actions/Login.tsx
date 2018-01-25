@@ -1,10 +1,13 @@
 import * as actions from './Actions';
-import { store } from './../models/Store';
 import { push } from 'connected-react-router';
 import * as routes from './../constants/Routes';
 import { authorize } from './../api/Authorization';
 import { Keys as localStorageKeys } from './../constants/LocalStorageConstants';
 import { onShowError } from './Error';
+import { ThunkAction } from 'redux-thunk';
+import { StoreState } from '../models/StoreState';
+import { Dispatch, ActionCreator } from 'react-redux';
+import { parse } from '../api/Response';
 
 export function onLogInStarted(): actions.LogInStartedAction {
     return {
@@ -25,26 +28,22 @@ export function onLogInCompleted(email: string): actions.LogInCompletedAction {
     };
 }
 
-export const onLogIn = (email: string): actions.LogInAction => {
-    store.dispatch(onLogInStarted());
+export const onLogIn: ActionCreator<ThunkAction<Promise<actions.Action>, StoreState, void>> 
+= (email: string) => {
+    return async (dispatch: Dispatch<StoreState>, getState: () => StoreState, params): Promise<actions.Action> => {
+        dispatch(onLogInStarted());
 
-    if (email !== '') {
-        authorize(email)
-        .then((token: string) => {
+        try {
+            let token = await parse<string>(authorize(email));
+            
             localStorage.setItem(localStorageKeys.USER_ID, email);
             localStorage.setItem(localStorageKeys.TOKEN, token);
-            store.dispatch(onLogInCompleted(email));
-            store.dispatch(push(routes.Routes.DEFAULT, store.getState()));
-        }).catch((error: Error) => {
-            store.dispatch(onShowError('Ooops!', `User with email address ${email} doesn't exists`));
-            store.dispatch(onLogInFailed());
-        });
-    } else {
-        store.dispatch(onShowError('Ooops!', `User name cannot be empty.`));
-        store.dispatch(onLogInFailed());
-    }
 
-    return {
-        type: actions.TypeKeys.LOG_IN
-    };
+            dispatch(push(routes.Routes.DEFAULT, getState()));
+            return dispatch(onLogInCompleted(email));
+        } catch(error) {
+            dispatch(onShowError('Ooops!', `User with email address ${email} doesn't exists`));
+            return dispatch(onLogInFailed());
+        }
+    }
 };

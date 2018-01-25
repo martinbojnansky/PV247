@@ -5,6 +5,10 @@ import { App } from '../models/App';
 import Channel, { ChannelDTO, ChannelCustomData, NewChannelDTO } from '../models/Channel';
 import { onShowError } from './Error';
 import { onGetMessages, onGetChannelMembers } from './Conversation';
+import { parse } from '../api/Response';
+import { ActionCreator, Dispatch } from 'react-redux';
+import { ThunkAction } from 'redux-thunk';
+import { StoreState } from '../models/StoreState';
 
 export function onGetAllChannelsStarted(): actions.GetAllChannelsStartedAction {
     return {
@@ -25,28 +29,53 @@ export function onGetAllChannelsCompleted(channels: Channel[]): actions.GetAllCh
     };
 }
 
-export const onGetAllChannels = (): actions.GetAllChannelsAction => {
-    store.dispatch(onGetAllChannelsStarted());
+export const onGetAllChannels: ActionCreator<ThunkAction<Promise<actions.Action>, StoreState, void>> 
+= () => {
+    return async (dispatch: Dispatch<StoreState>, getState: () => StoreState, params): Promise<actions.Action> => {
+        dispatch(onGetAllChannelsStarted());
 
-    getChannels()
-    .then((app: App) => {
-        let currentUserId: string = store.getState().profile.email;
-        let channels: Channel[] = parseChannels(app.channels);
-        channels = channels.filter(c => 
-            c.customData.owner === currentUserId
-            || c.customData.memberIds.findIndex(i => i === currentUserId) !== -1);
-        store.dispatch(onSelectedChannelChanged(channels[0]));
-        store.dispatch(onGetAllChannelsCompleted(channels));
-    })
-    .catch((error: Error) => {
-        store.dispatch(onGetAllChannelsFailed());
-        store.dispatch(onShowError('Ooops!', 'Unable to get channels. Check your network connection and try again.'));
-    });
-    
-    return {
-        type: actions.TypeKeys.GET_ALL_CHANNELS
-    };
+        try {
+            let app = await parse<App>(getChannels());
+            
+            let currentUserId: string = getState().profile.email;   
+            let channels: Channel[] = parseChannels(app.channels);
+
+            channels = channels.filter(c => 
+                c.customData.owner === currentUserId
+                || c.customData.memberIds.findIndex(i => i === currentUserId) !== -1);
+            
+            dispatch(onSelectedChannelChanged(channels[0]));
+            return dispatch(onGetAllChannelsCompleted(channels));
+            
+        } catch(error) {
+            dispatch(onShowError('Ooops!', 'Unable to get channels. Check your network connection and try again.'));
+            return dispatch(onGetAllChannelsFailed());
+        }
+    }
 };
+
+// export const onGetAllChannels = (): actions.GetAllChannelsAction => {
+//     store.dispatch(onGetAllChannelsStarted());
+
+//     parse<App>(getChannels())
+//     .then(app => {
+//         let currentUserId: string = store.getState().profile.email;
+//         let channels: Channel[] = parseChannels(app.channels);
+//         channels = channels.filter(c => 
+//             c.customData.owner === currentUserId
+//             || c.customData.memberIds.findIndex(i => i === currentUserId) !== -1);
+//         store.dispatch(onSelectedChannelChanged(channels[0]));
+//         store.dispatch(onGetAllChannelsCompleted(channels));
+//     })
+//     .catch((error: Error) => {
+//         store.dispatch(onGetAllChannelsFailed());
+//         store.dispatch(onShowError('Ooops!', 'Unable to get channels. Check your network connection and try again.'));
+//     });
+    
+//     return {
+//         type: actions.TypeKeys.GET_ALL_CHANNELS
+//     };
+// };
 
 function parseChannels(dtos: ChannelDTO[]): Channel[] {
     return dtos.map(function(dto: ChannelDTO) {

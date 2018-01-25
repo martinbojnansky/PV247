@@ -1,4 +1,4 @@
-export default interface Message {
+export interface Message {
     id: string;
     value: string;
     createdAt: string;
@@ -7,6 +7,7 @@ export default interface Message {
     updatedBy: string;
     customData: MessageCustomData;
 }
+export default Message;
 
 export interface MessageCustomData {
     upVotes: string[];

@@ -35,12 +35,7 @@ export const deleteMessage = (channelId: string, messageId: string) => {
         method: 'DELETE',
         headers: authorizationHeader()
     })
-    .then((response: Response) => {
-        if (response.status < 200 && response.status >= 300) { 
-            let error = new Error('Oops!');
-            throw error;
-        }
-    });
+    .then(validate);
 };
 
 export const getMessages = (channelId: string) => {

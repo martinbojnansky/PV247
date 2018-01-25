@@ -18,7 +18,7 @@ export interface ConversationProps {
 }
 
 export interface ConversationDispatch {
-    onGetMessages: (channelId: string) => actions.GetMessagesAction;
+    onGetMessages: (channelId: string) => Promise<actions.Action>;
     onRenameChannel: (channel: Channel) => actions.RenameChannelAction;
     onInviteMemberToChannel: (channel: Channel) => actions.InviteMemberToChannelAction;
     onDeleteChannel: (channelId: string) => actions.DeleteChannelAction;

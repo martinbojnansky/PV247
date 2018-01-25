@@ -9,6 +9,11 @@ import Channel, { ChannelDTO } from '../models/Channel';
 import { getUser, getUserPicture } from '../api/User';
 import { User, UserCustomData } from '../models/User';
 import { Member } from '../models/Member';
+import { parse } from '../api/Response';
+import { ActionCreator } from 'react-redux';
+import { ThunkAction } from 'redux-thunk';
+import { StoreState } from '../models/StoreState';
+import { Dispatch } from 'redux';
 
 export function onDeleteChannelStarted(): actions.DeleteChannelStartedAction {
     return {
@@ -67,26 +72,27 @@ export function onGetMessagesCompleted(messages: Message[]): actions.GetMessages
     };
 }
 
-export const onGetMessages = (channelId: string, scrollToEnd: boolean = true, showErrors: boolean = true): 
-actions.GetMessagesAction => {
-    store.dispatch(onGetMessagesStarted());
-    getMessages(channelId)
-    .then((messageDTOs: MessageDTO[]) => {
-        let messages: Message[] = parseMessages(messageDTOs);
-        store.dispatch(onGetMessagesCompleted(messages));
-        scrollToNewestMessage(scrollToEnd); 
-    })
-    .catch((error: Error) => {
-        if (showErrors) {
-            store.dispatch(onGetMessagesFailed());
-            store.dispatch(
-                onShowError('Ooops!', 'Unable to get messages. Check your network connection and try again.'));
+export const onGetMessages: ActionCreator<ThunkAction<Promise<actions.Action>, StoreState, void>> 
+= (channelId: string, scrollToEnd: boolean = true, showErrors: boolean = true) => {
+    return async (dispatch: Dispatch<StoreState>, getState: () => StoreState, params): Promise<actions.Action> => {
+        dispatch(onGetMessagesStarted());
+
+        try {
+            let messageDTOs = await parse<MessageDTO[]>(getMessages(channelId));
+            let messages: Message[] = parseMessages(messageDTOs);
+            
+            scrollToNewestMessage(scrollToEnd); 
+            return dispatch(onGetMessagesCompleted(messages));
         }
-    });
-    
-    return {
-        type: actions.TypeKeys.GET_MESSAGES
-    };
+        catch(error) {
+            if (showErrors) {
+                dispatch(onShowError('Ooops!', 'Unable to get messages. Check your network connection and try again.'));
+                return dispatch(onGetMessagesFailed());
+            }
+        }
+
+        return dispatch(onGetMessagesCompleted([]));
+    }
 };
 
 function parseMessages(dtos: MessageDTO[]): Message[] {
@@ -259,8 +265,8 @@ export function onGetChannelMembers(channel: Channel) {
     memberIds.push(channel.customData.owner);
 
     for (let memberId of memberIds) {
-        getUser(memberId)
-        .then((member: User) => {
+        parse<User>(getUser(memberId))
+        .then(member => {
             onChannelMemberRecieved(member);
         });
     }
@@ -275,8 +281,8 @@ export function onChannelMembersChanged(members: {[id: string]: Member}): action
 
 function onChannelMemberRecieved(user: User) {
     let userCustomData: UserCustomData = JSON.parse(user.customData);  
-    getUserPicture(userCustomData.pictureId)
-    .then((pictureUrl: string) => {
+    parse<string>(getUserPicture(userCustomData.pictureId))
+    .then(pictureUrl => {
         let member: Member = {
             email: user.email,
             displayName: userCustomData.displayName,

@@ -1,7 +1,7 @@
 import { ProgressIndicatorProps } from './../components/ProgressIndicator';
 import { ProfileProps } from './../components/Profile';
 import { ChannelsProps } from './../components/Channels';
-import { getUserId } from './../constants/LocalStorageConstants';
+import { tryGetUserId } from './../constants/LocalStorageConstants';
 import { getDefaultUserCustomData } from './../models/User';
 import { ConversationProps } from '../components/Conversation';
 import { MessageComposerProps } from '../components/MessageComposer';
@@ -16,38 +16,41 @@ export interface StoreState {
     messageComposer: MessageComposerProps;
 }
 
-export const initialState: StoreState = {
-    progressIndicator: {
-        isActive: false
-    },
-    error: {
-        isVisible: false,
-        title: '',
-        description: ''
-    },
-    profile: {
-        email: getUserId(),
-        isUserCustomDataLoaded: false,
-        isChanged: false,
-        userCustomData: getDefaultUserCustomData(),
-        pictureUrl: '',
-        newDisplayName: '',
-        newPicturePath: ''
-    },
-    channels: {
-        isChannelsDataLoaded: false,
-        channels: [],
-        selectedChannel: undefined
-    },
-    conversation: {
-        isConversationDataLoaded: false,
-        channel: undefined,
-        messages: [],
-        members: {},
-        currentUserId: getUserId()
-    },
-    messageComposer: {
-        message: '',
-        isEnabled: false
-    }
+export const initialState = (): StoreState =>
+{
+    return ({
+        progressIndicator: {
+            isActive: false, 
+        },
+        error: {
+            isVisible: false,
+            title: '',
+            description: ''
+        },
+        profile: {
+            email: tryGetUserId(),
+            isUserCustomDataLoaded: false,
+            isChanged: false,
+            userCustomData: getDefaultUserCustomData(),
+            pictureUrl: '',
+            newDisplayName: '',
+            newPicturePath: ''
+        },
+        channels: {
+            isChannelsDataLoaded: false,
+            channels: [],
+            selectedChannel: undefined
+        },
+        conversation: {
+            isConversationDataLoaded: false,
+            channel: undefined,
+            messages: [],
+            members: {},
+            currentUserId: tryGetUserId()
+        },
+        messageComposer: {
+            message: '',
+            isEnabled: false
+        }
+    });
 };

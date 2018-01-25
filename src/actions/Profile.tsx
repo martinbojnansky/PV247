@@ -6,6 +6,7 @@ import { push } from 'connected-react-router';
 import { Routes } from '../constants/Routes';
 import { BlobFile } from '../models/BlobFile';
 import { onShowError } from './Error';
+import { parse } from '../api/Response';
 
 export function onUserDisplayNameChanged(displayName: string): actions.UserDisplayNameChangedAction {
     return {
@@ -44,8 +45,8 @@ export function onGetUserCompleted(userCustomData: UserCustomData, pictureUrl: s
 export const onGetUser = (email: string): actions.GetUserAction => {
     store.dispatch(onGetUserStarted());
 
-    getUser(email)
-    .then((user: User) => {
+    parse<User>(getUser(email))
+    .then(user => {
         onUserRecieved(user);
     })
     .catch((error: Error) => {
@@ -62,7 +63,7 @@ export const onGetUser = (email: string): actions.GetUserAction => {
 function onUserRecieved(user: User) {
     let userCustomData: UserCustomData = JSON.parse(user.customData);
     
-    getUserPicture(userCustomData.pictureId)
+    parse<string>(getUserPicture(userCustomData.pictureId))
     .then((pictureUrl: string) => {
         store.dispatch(onGetUserCompleted(userCustomData, pictureUrl));
     })
@@ -112,8 +113,8 @@ actions.SaveUserAction => {
     store.dispatch(onSaveUserStarted());
     
     if (pictureFile) {
-        saveUserPicture(pictureFile)
-        .then((blobFile: BlobFile[]) => {
+        parse<BlobFile[]>(saveUserPicture(pictureFile))
+        .then(blobFile => {
             onSavingUser(email, displayName, blobFile[0].id);
         })
         .catch((error: Error) => {
@@ -135,8 +136,8 @@ function onSavingUser(email: string, displayName: string, pictureId: string = ''
         pictureId: getUserPictureId(pictureId)
     };
 
-    saveUser(email, newUser)
-    .then((user: User) => {
+    parse<User>(saveUser(email, newUser))
+    .then(user => {
         let userCustomData: UserCustomData = JSON.parse(user.customData);
         store.dispatch(onSaveUserCompleted(email, userCustomData));
         store.dispatch(push(Routes.CHANNELS));

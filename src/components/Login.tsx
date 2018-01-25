@@ -6,7 +6,7 @@ export interface LogInProps {
 }
 
 export interface LogInDispatch {
-  onLogIn: (email: string) => actions.LogInAction;
+  onLogIn: (email: string) => Promise<actions.Action>;
 }
 
 function Login(props: LogInProps & LogInDispatch) {

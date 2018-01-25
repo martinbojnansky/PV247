@@ -14,7 +14,7 @@ export function mapStateToProps({ channels }: StoreState): ChannelsProps {
 
 export function mapDispatchToProps(dispatch: Dispatch<StoreState>): ChannelsDispatch {
   return {
-    onGetAllChannels: () => dispatch(actions.onGetAllChannels()),   
+    onGetAllChannels: async () => await dispatch(actions.onGetAllChannels()),   
     onSelectedChannelChanged: (selectedChannel: Channel) => dispatch(actions.onSelectedChannelChanged(selectedChannel)),
     onCreateNewChannel: () => dispatch(actions.onCreateNewChannel())
   };
