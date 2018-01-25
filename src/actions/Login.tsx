@@ -31,6 +31,11 @@ export function onLogInCompleted(email: string): actions.LogInCompletedAction {
 export const onLogIn: ActionCreator<ThunkAction<Promise<actions.Action>, StoreState, void>> 
 = (email: string) => {
     return async (dispatch: Dispatch<StoreState>, getState: () => StoreState, params): Promise<actions.Action> => {
+        if(email === '') {
+            dispatch(onShowError('Ooops!', `Email address cannot be empty.`));
+            return dispatch(onLogInFailed());
+        }
+
         dispatch(onLogInStarted());
 
         try {
