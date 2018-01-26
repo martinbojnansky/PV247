@@ -4,6 +4,7 @@ import * as actions from './../../actions/MessageComposer';
 import { initialState, StoreState } from './../../models/StoreState';
 import { Keys as localStorageKeys } from './../../constants/LocalStorageConstants';
 import { API_URI, API_KEY } from '../../constants/ApiConstants';
+import { reducers } from './../../reducers/Reducers';
 
 const middlewares = [thunk];
 const mockStore = configureMockStore<StoreState>(middlewares);
@@ -37,7 +38,8 @@ describe('tests message composer thunks', () => {
     fetchMock.post(`${API_URI}app/${API_KEY}/channel/${channelId}/message`, {});
     fetchMock.get(`${API_URI}app/${API_KEY}/channel/${channelId}/message`, {});
 
-    const store = mockStore(state);
+    let store = mockStore(state);
+    store.replaceReducer(reducers);
 
     const expectedActions = [
       actions.onSendMessageStarted(),
