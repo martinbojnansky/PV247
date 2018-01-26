@@ -6,7 +6,6 @@ import { App } from '../../models/App';
 import { Keys as localStorageKeys } from './../../constants/LocalStorageConstants';
 
 const fetchMock = require('fetch-mock');
-require('jest-localstorage-mock');
 
 describe('tests channels api', () => {
     beforeAll(() => {

@@ -273,7 +273,7 @@ export const onGetChannelMembers: ActionCreator<ThunkAction<Promise<actions.Acti
 = (channel: Channel) => {
     return async (dispatch: Dispatch<StoreState>, getState: () => StoreState, params): Promise<actions.Action> => { 
         dispatch(onGetChannelMembersStarted());
-        let memberIds = channel.customData.memberIds;
+        let memberIds = [...channel.customData.memberIds];
         memberIds.push(channel.customData.owner);
 
         for (let memberId of memberIds) {

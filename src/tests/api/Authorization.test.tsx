@@ -4,7 +4,6 @@ import { API_URI } from '../../constants/ApiConstants';
 import { Keys as localStorageKeys } from './../../constants/LocalStorageConstants';
 
 const fetchMock = require('fetch-mock');
-require('jest-localstorage-mock');
 
 describe('tests authorization api', () => {
   beforeAll(() => {

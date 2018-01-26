@@ -11,7 +11,6 @@ import { App } from '../../models/App';
 const middlewares = [thunk];
 const mockStore = configureMockStore<StoreState>(middlewares);
 const fetchMock = require('fetch-mock');
-require('jest-localstorage-mock');
 
 describe('tests channel thunks', () => {
     beforeAll(() => {
@@ -25,7 +24,7 @@ describe('tests channel thunks', () => {
         fetchMock.restore();
       });
 
-  xit('gets channels', () => {
+  it('gets channels', () => {
     let app: App = {
         id: "app",
         channels: [
@@ -66,7 +65,8 @@ describe('tests channel thunks', () => {
 
     localStorage.setItem(localStorageKeys.USER_ID, "a");
     fetchMock.get(`${API_URI}app/${API_KEY}`, app);
-    fetchMock.get(`begin:${API_URI}${API_KEY}/user`, channels[0]);
+    fetchMock.get(`begin:${API_URI}${API_KEY}/user`, {});
+    fetchMock.get(`begin:${API_URI}app/${API_KEY}/channel/${channels[0].id}/message`, {});
 
     const store = mockStore(initialState());
 
@@ -82,7 +82,10 @@ describe('tests channel thunks', () => {
 
     return store.dispatch(actions.onGetAllChannels())
     .then(() => {
-      //expect(store.getActions()).toContain(expectedActions);
+        let recievedActions = store.getActions();
+        expectedActions.forEach(expectedAction => {
+            expect(recievedActions).toContainEqual(expectedAction);
+        });
     });
   });
 });

@@ -6,7 +6,6 @@ import { BlobFile } from '../../models/BlobFile';
 import { Keys as localStorageKeys } from './../../constants/LocalStorageConstants';
 
 const fetchMock = require('fetch-mock');
-require('jest-localstorage-mock');
 
 describe('tests users api', () => {
     beforeAll(() => {

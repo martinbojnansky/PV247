@@ -8,7 +8,6 @@ import { API_URI } from '../../constants/ApiConstants';
 const middlewares = [thunk];
 const mockStore = configureMockStore<StoreState>(middlewares);
 const fetchMock = require('fetch-mock');
-require('jest-localstorage-mock');
 
 describe('tests login thunks', () => {
     beforeAll(() => {
