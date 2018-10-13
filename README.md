@@ -14,5 +14,6 @@ using:
 - React-router
 - Jest
 - Redux-thunk
+- Bootstrap
 
-This app is dependant on [https://pv247messaging.azurewebsites.net/api/].
+This app is dependant on https://pv247messaging.azurewebsites.net/api/.
