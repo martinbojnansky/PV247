@@ -11,9 +11,10 @@ using:
 
 - React.js
 - Typescript
+- Redux
 - React-router
-- Jest
 - Redux-thunk
 - Bootstrap
+- Jest
 
 This app is dependant on https://pv247messaging.azurewebsites.net/api/.
