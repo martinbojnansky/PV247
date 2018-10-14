@@ -1,4 +1,4 @@
-## School project for University course PV247
+# School project for University course PV247
 This project demonstrates communication tool using React.js with ability to:
 
 - Login users
@@ -19,5 +19,5 @@ using:
 
 This app is dependant on https://pv247messaging.azurewebsites.net/api/.
 
-# Demo
+## Demo
 See demo on: https://youtu.be/_mdnJyawxeI.
