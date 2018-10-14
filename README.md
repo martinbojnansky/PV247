@@ -17,7 +17,7 @@ using:
 - Bootstrap
 - Jest
 
-This app is dependant on https://pv247messaging.azurewebsites.net/api/.
+This app is dependant on https://pv247messaging.azurewebsites.net/api/ provided by Kentico.
 
 ## Demo
 See demo on: https://youtu.be/_mdnJyawxeI.
